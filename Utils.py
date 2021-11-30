@@ -19,16 +19,17 @@ BEIGE = (178, 168, 152)
 
 BORDER_THICKNESS = 1.0
 
-HEIGHT_TOTAL = 900
-WIDTH = 800
-HEIGHT = 800
-SCREEN_SIZE = (WIDTH, HEIGHT_TOTAL)
+WIDTH = 700
+HEIGHT = 700
+WIDTH_TOTAL = WIDTH + 350
+SCREEN_SIZE = (WIDTH_TOTAL, HEIGHT)
 
 FONTSIZE_START = 50
 FONTSIZE_COMMANDS_INTIAL = 25
-FONTSIZE_MAZE = 20
+FONTSIZE_MAZE = 28
 
-SIZE = 25
+# Size of a block
+SIZE = 50
 
 def text(background, message, color, size, coordinate_x, coordinate_y):
     font = pygame.font.SysFont(None, size)

@@ -89,7 +89,32 @@ class Maze:
             node.top_border.color = color
             neightbor.bottom_border.color = color
 
+    def reset(self, background):
+        x = 0
+        y = 0
+        current_cell = self.maze[x][y]
+        while x < self.final_coordinate_y:
+            x = x + 1
+            while y < self.final_coordinate_y:
+                if x != self.final_coordinate_x and y != self.final_coordinate_y:
+                    current_cell.color = YELLOW
+                    if current_cell.top_border.color == GREEN or current_cell.top_border.color == PINK:
+                        current_cell.top_border.color = YELLOW
+                    if current_cell.bottom_border.color == GREEN or current_cell.top_border.color == PINK:
+                        current_cell.bottom_border.color = YELLOW
+                    if current_cell.right_border.color == GREEN or current_cell.top_border.color == PINK:
+                        current_cell.right_border.color = YELLOW
+                    if current_cell.left_border.color == GREEN or current_cell.top_border.color == PINK:
+                        current_cell.left_border.color = YELLOW
+                    self.render(background)
+                    pygame.display.update()
+
     def dfs(self, background):
+        """
+        Using randomized depth first search algorithm to generate the maze
+        :param background:
+        :return:
+        """
         current_cell = random.choice(random.choice(self.maze))
         current_cell.visited = True
         current_cell.color = GREEN
@@ -127,13 +152,11 @@ class Maze:
                     stack.pop()
                     current_cell = stack[-1]
             self.render(background)
-            text(background, "GENERATING MAZE", WHITE, FONTSIZE_COMMANDS_INTIAL, WIDTH/2 - 60, HEIGHT / 2)
+            text(background, "GENERATING MAZE", WHITE, 45, WIDTH / 2 - 60, HEIGHT / 2)
             pygame.display.update()
         self.maze_created = True
 
-
-
-    def bfs(self, background, player):
+    def breadth_first_search(self, background, player):
         """
         Using Best First Search to solve the maze
         It decides the cost based on x coordinate
@@ -169,14 +192,14 @@ class Maze:
                     if i.matrix_pos_x == self.final_coordinate_x and i.matrix_pos_y == self.final_coordinate_y:
                         find = True
             self.render(background)
-            text(background, "SOLVING MAZE", WHITE, FONTSIZE_COMMANDS_INTIAL, WIDTH/2 - 60, HEIGHT / 2)
+            text(background, "SOLVING MAZE", WHITE, FONTSIZE_COMMANDS_INTIAL, WIDTH / 2 - 60, HEIGHT / 2)
             player.render(background)
             pygame.display.update()
 
         current = self.maze[self.final_coordinate_x][self.final_coordinate_y]
         while (current.parent).parent != None:
             current = current.parent
-            current.color = GREEN   # color for the solution
+            current.color = GREEN  # color for the solution
 
             if current.top_border.color == PINK:
                 current.top_border.color = GREEN
@@ -191,10 +214,16 @@ class Maze:
             player.render(background)
             pygame.display.update()
 
+    def a_star_search(self, background, player):
+        start_node = self.maze[player.matrix_pos_x][player.matrix_pos_y]
+        start_node.explored = True
+        find = False
+        queue = [start_node]
+
     def render(self, background):
         for i in range(0, int(HEIGHT / SIZE)):
             for j in range(0, int(WIDTH / SIZE)):
                 self.maze[i][j].render(background)
         if self.maze_created:
-            self.maze[self.initial_coordinate_x][self.initial_coordinate_y].color = BEIGE
-            self.maze[self.final_coordinate_x][self.final_coordinate_y].color = LIGHTBLUE
+            self.maze[self.initial_coordinate_x][self.initial_coordinate_y].color = BLUE
+            self.maze[self.final_coordinate_x][self.final_coordinate_y].color = RED

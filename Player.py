@@ -9,7 +9,7 @@ class Player:
         self.matrix_pos_y = initial_y
         self.width = SIZE - 2 * BORDER_THICKNESS
         self.height = SIZE - 2 * BORDER_THICKNESS
-        self.color = RED
+        self.color = WHITE
 
     def update(self, maze, events):
         for event in events:
