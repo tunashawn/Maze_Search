@@ -1,4 +1,7 @@
-from Utils import *
+from pygame import surface
+from pygame.examples.textinput import Screen
+
+from Settings import *
 
 
 class NodeBorder:
@@ -17,6 +20,17 @@ class NodeBorder:
 class Node():
     def __init__(self, pos_x, pos_y):
         self.color = DARKGRAY
+
+        # This is the additional part to be able to solve the
+        # maze using A* search algorithm
+        # g(n) The cost reach this node
+        self.cost_to_reach = 0
+        # h(n) The estimate cost from this node to destination
+        self.estimate_cost = 0
+        # Total cost = g(n) + h(n)
+        self.total_cost = 0
+
+        self.font = pygame.font.SysFont('Arial', 20)
 
         self.visited = False
         self.explored = False
@@ -38,6 +52,7 @@ class Node():
         self.neighbors_connected = []
         self.parent = None
 
+
     def render(self, background):
         pygame.draw.rect(background, self.color, [self.pos_x, self.pos_y, self.width, self.height])
 
@@ -45,3 +60,4 @@ class Node():
         self.bottom_border.render(background)
         self.right_border.render(background)
         self.left_border.render(background)
+

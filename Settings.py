@@ -19,8 +19,8 @@ BEIGE = (178, 168, 152)
 
 BORDER_THICKNESS = 1.0
 
-WIDTH = 700
-HEIGHT = 700
+WIDTH = 1000
+HEIGHT = 1000
 WIDTH_TOTAL = WIDTH + 350
 SCREEN_SIZE = (WIDTH_TOTAL, HEIGHT)
 
@@ -35,4 +35,3 @@ def text(background, message, color, size, coordinate_x, coordinate_y):
     font = pygame.font.SysFont(None, size)
     text = font.render(message, True, color)
     background.blit(text, [coordinate_x, coordinate_y])
-

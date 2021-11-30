@@ -1,4 +1,4 @@
-from Utils import *
+from Settings import *
 
 
 class Player:

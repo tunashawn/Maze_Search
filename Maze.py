@@ -1,6 +1,9 @@
 import random
+
+import pygame.time
+
 from Node import Node
-from Utils import *
+from Settings import *
 
 
 class Maze:
@@ -89,26 +92,6 @@ class Maze:
             node.top_border.color = color
             neightbor.bottom_border.color = color
 
-    def reset(self, background):
-        x = 0
-        y = 0
-        current_cell = self.maze[x][y]
-        while x < self.final_coordinate_y:
-            x = x + 1
-            while y < self.final_coordinate_y:
-                if x != self.final_coordinate_x and y != self.final_coordinate_y:
-                    current_cell.color = YELLOW
-                    if current_cell.top_border.color == GREEN or current_cell.top_border.color == PINK:
-                        current_cell.top_border.color = YELLOW
-                    if current_cell.bottom_border.color == GREEN or current_cell.top_border.color == PINK:
-                        current_cell.bottom_border.color = YELLOW
-                    if current_cell.right_border.color == GREEN or current_cell.top_border.color == PINK:
-                        current_cell.right_border.color = YELLOW
-                    if current_cell.left_border.color == GREEN or current_cell.top_border.color == PINK:
-                        current_cell.left_border.color = YELLOW
-                    self.render(background)
-                    pygame.display.update()
-
     def dfs(self, background):
         """
         Using randomized depth first search algorithm to generate the maze
@@ -152,75 +135,109 @@ class Maze:
                     stack.pop()
                     current_cell = stack[-1]
             self.render(background)
-            text(background, "GENERATING MAZE", WHITE, 45, WIDTH / 2 - 60, HEIGHT / 2)
+            text(background, "GENERATING MAZE", WHITE, 60, WIDTH / 2 - 120, HEIGHT / 2 - 50)
             pygame.display.update()
         self.maze_created = True
 
-    def breadth_first_search(self, background, player):
-        """
-        Using Best First Search to solve the maze
-        It decides the cost based on x coordinate
-        and y coordinate of the current block and
-        the destination block
+    def color_explored_node(self, node):
+        node.color = PINK
+        if node.top_border.color == YELLOW:
+            node.top_border.color = PINK
+        if node.bottom_border.color == YELLOW:
+            node.bottom_border.color = PINK
+        if node.right_border.color == YELLOW:
+            node.right_border.color = PINK
+        if node.left_border.color == YELLOW:
+            node.left_border.color = PINK
 
-        :param background:
-        :param player:
-        :return:
-        """
-        initial_node = self.maze[player.matrix_pos_x][player.matrix_pos_y]
-        initial_node.explored = True
-        find = False
-        queue = [initial_node]
-        while len(queue) > 0 and not find:
-            queue[0].color = PINK
+    def color_solution(self, current):
+        current.color = GREEN  # color for the solution
 
-            if queue[0].top_border.color == YELLOW:
-                queue[0].top_border.color = PINK
-            if queue[0].bottom_border.color == YELLOW:
-                queue[0].bottom_border.color = PINK
-            if queue[0].right_border.color == YELLOW:
-                queue[0].right_border.color = PINK
-            if queue[0].left_border.color == YELLOW:
-                queue[0].left_border.color = PINK
+        if current.top_border.color == PINK:
+            current.top_border.color = GREEN
+        if current.bottom_border.color == PINK:
+            current.bottom_border.color = GREEN
+        if current.right_border.color == PINK:
+            current.right_border.color = GREEN
+        if current.left_border.color == PINK:
+            current.left_border.color = GREEN
 
-            u = queue.pop(0)
-            for i in u.neighbors_connected:
-                if i.explored == False:
-                    i.parent = u
-                    i.explored = True
-                    queue.append(i)
-                    if i.matrix_pos_x == self.final_coordinate_x and i.matrix_pos_y == self.final_coordinate_y:
-                        find = True
-            self.render(background)
-            text(background, "SOLVING MAZE", WHITE, FONTSIZE_COMMANDS_INTIAL, WIDTH / 2 - 60, HEIGHT / 2)
-            player.render(background)
-            pygame.display.update()
-
-        current = self.maze[self.final_coordinate_x][self.final_coordinate_y]
-        while (current.parent).parent != None:
-            current = current.parent
-            current.color = GREEN  # color for the solution
-
-            if current.top_border.color == PINK:
-                current.top_border.color = GREEN
-            if current.bottom_border.color == PINK:
-                current.bottom_border.color = GREEN
-            if current.right_border.color == PINK:
-                current.right_border.color = GREEN
-            if current.left_border.color == PINK:
-                current.left_border.color = GREEN
-
-            self.render(background)
-            player.render(background)
-            pygame.display.update()
+    def calculate_cost(self, node):
+        """Calculate g(n), h(n), and total cost"""
+        # Calculate g(n)
+        node.cost_to_reach = node.parent.cost_to_reach + 1
+        # Calculate h(n)
+        node.estimate_cost = (self.final_coordinate_x - node.matrix_pos_x) + (
+                self.final_coordinate_y - node.matrix_pos_y)
+        # Calculate total cost = g(n) + h(n)
+        node.total_cost = node.cost_to_reach + node.estimate_cost
 
     def a_star_search(self, background, player):
+        """Solving the maze using A* Search Algorithm
+        Find the way from the current position of the player to the goal"""
+        # Set the start_node to the current position of the player
         start_node = self.maze[player.matrix_pos_x][player.matrix_pos_y]
         start_node.explored = True
-        find = False
-        queue = [start_node]
+        found = False
+
+        # Set cost_to_reach for the start node
+        start_node.cost_to_reach = 0
+
+        # Put the start_node to to frontier
+        frontier = [start_node]
+
+        # Keep exploring the map until there are no
+        # node to be explored or until reach the destination
+        while len(frontier) > 0 and not found:
+            # Sort the frontier by total_cost: g(n) + h(n)
+            # This works like a priority queue
+            frontier.sort(key=lambda x: x.total_cost)
+
+            # Pop out the node with smallest total_cost
+            node = frontier.pop(0)
+
+            # All the node that this algorithm visited
+            # will be colored in PINK
+            self.color_explored_node(node)
+
+            # Traverse through neighbor nodes
+            for neighbor in node.neighbors_connected:
+                # Set the current nodes to be the parent of the neighbor nodes
+                # that are not explored yet
+                # Then add it to the frontier
+                if neighbor.explored is False:
+                    neighbor.parent = node
+                    neighbor.explored = True
+
+                    # Calculate g(n), h(n), and total cost for this node
+                    self.calculate_cost(neighbor)
+
+                    frontier.append(neighbor)
+                    # If this node is the destination, then set the found = True
+                    # Then stop exploring the maze
+                    if neighbor.matrix_pos_x == self.final_coordinate_x and neighbor.matrix_pos_y == self.final_coordinate_y:
+                        found = True
+
+            self.render(background)
+            text(background, "SOLVING MAZE USING A* ALGORITHM", WHITE, 60, WIDTH / 2 - 180, HEIGHT / 2 - 50)
+            player.render(background)
+            pygame.display.update()
+
+        # Now start from the goal node
+        current = self.maze[self.final_coordinate_x][self.final_coordinate_y]
+        # Draw the path to from the goal to the position of player
+        # Using color of GREEN
+        while (current.parent).parent is not None:
+            current = current.parent
+            # Color the path by GREEN
+            self.color_solution(current)
+
+            self.render(background)
+            player.render(background)
+            pygame.display.update()
 
     def render(self, background):
+
         for i in range(0, int(HEIGHT / SIZE)):
             for j in range(0, int(WIDTH / SIZE)):
                 self.maze[i][j].render(background)
