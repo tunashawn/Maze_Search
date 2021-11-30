@@ -76,3 +76,7 @@ def a_star_search(self, background, player):
             self.render(background)
             player.render(background)
             pygame.display.update()
+
+Screenshots:
+![img.png](img.png)
+![img_1.png](img_1.png)
