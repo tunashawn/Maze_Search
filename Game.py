@@ -80,6 +80,7 @@ class Game:
             text(self.background, "PRESS (R) TO RETRY GAME",    WHITE, FONTSIZE_MAZE, WIDTH + 5, 125)
             text(self.background, "PRESS (Q) TO GIVE UP",       WHITE, FONTSIZE_MAZE, WIDTH + 5, 155)
             text(self.background, "PRESS (ESC) TO CLOSE GAME",  WHITE, FONTSIZE_MAZE, WIDTH + 5, 185)
+            text(self.background, "USE ARROW KEYS TO MOVE THE AGENT", WHITE, FONTSIZE_MAZE, WIDTH + 5, 230)
 
         elif self.winner:
             text(self.background, "YOU WIN!",                   BLUE, FONTSIZE_MAZE + 5, WIDTH + 5, 5)
